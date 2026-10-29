@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * A Tonie from the us.tonies.com store catalog.
  */
-#[Fillable(['sku', 'skus', 'handle', 'title', 'category', 'series', 'ages', 'price', 'image', 'available', 'owned', 'published_at'])]
+#[Fillable(['sku', 'skus', 'handle', 'title', 'category', 'series', 'ages', 'price', 'image', 'available', 'preorder', 'release_date', 'owned', 'published_at'])]
 class CatalogTonie extends Model
 {
     /**
@@ -24,6 +24,8 @@ class CatalogTonie extends Model
             'ages' => 'array',
             'price' => 'float',
             'available' => 'boolean',
+            'preorder' => 'boolean',
+            'release_date' => 'date',
             'owned' => 'boolean',
             'published_at' => 'date',
             'wishlisted_at' => 'datetime',
@@ -41,6 +43,18 @@ class CatalogTonie extends Model
     public function url(): string
     {
         return config('tonies.store_url').'/products/'.$this->handle;
+    }
+
+    /**
+     * Badge text for pre-orders, e.g. "Pre-order · releases Dec 1".
+     */
+    public function preorderLabel(): ?string
+    {
+        if (! $this->preorder) {
+            return null;
+        }
+
+        return $this->release_date ? 'Pre-order · releases '.$this->release_date->format('M j') : 'Pre-order';
     }
 
     public function note(): ?string

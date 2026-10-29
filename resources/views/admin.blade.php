@@ -70,6 +70,7 @@
                         <h2 x-text="t.title"></h2>
                         <p class="meta" x-text="t.meta"></p>
                         <p class="note" x-show="t.note" x-text="t.note"></p>
+                        <span class="badge preorder" x-show="t.preorder" x-text="t.preorder"></span>
                         <span class="badge" x-show="!t.available">Sold out right now</span>
                         <div class="foot">
                             <span class="price" x-text="money(t.price)"></span>

@@ -23,9 +23,11 @@
                         @if ($tonie->note())
                             <p class="note">{{ $tonie->note() }}</p>
                         @endif
-                        @unless ($tonie->available)
+                        @if ($tonie->preorderLabel())
+                            <span class="badge preorder">{{ $tonie->preorderLabel() }}</span>
+                        @elseif (! $tonie->available)
                             <span class="badge">Sold out right now</span>
-                        @endunless
+                        @endif
                         <div class="foot">
                             <span class="price">${{ number_format($tonie->price, 2) }}</span>
                             <a class="buy" href="{{ $tonie->url() }}" target="_blank" rel="noopener">View at tonies →</a>

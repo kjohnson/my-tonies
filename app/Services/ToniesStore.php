@@ -11,6 +11,8 @@ use Throwable;
  */
 class ToniesStore
 {
+    private const PREORDER_TAGS = ['preorder', 'purple-dot-has-variant-on-preorder'];
+
     /**
      * Tonies in the store, limited to the product types in config('tonies.categories')
      * and leaving out those only in config('tonies.hidden_languages').
@@ -32,6 +34,8 @@ class ToniesStore
                     fn (array $v) => preg_replace('/-PS$/', '', $v['sku']),
                     $p['variants'],
                 )));
+                // The feed reports pre-orders as unavailable; Purple Dot (the store's pre-order app) tags them
+                $preorder = (bool) array_intersect(self::PREORDER_TAGS, $p['tags']);
 
                 return [
                     'sku' => $skus[0],
@@ -43,7 +47,9 @@ class ToniesStore
                     'ages' => $tags['Age Range'] ?? [],
                     'price' => (float) $p['variants'][0]['price'],
                     'image' => $p['images'][0]['src'] ?? null,
-                    'available' => collect($p['variants'])->contains('available', true),
+                    'available' => $preorder || collect($p['variants'])->contains('available', true),
+                    'preorder' => $preorder,
+                    'release_date' => $preorder ? $this->publicationDate($p['tags']) : null,
                     'published_at' => isset($p['published_at']) ? substr($p['published_at'], 0, 10) : null,
                 ];
             })
@@ -80,6 +86,22 @@ class ToniesStore
             }
             array_push($products, ...$batch);
         }
+    }
+
+    /**
+     * Release date from a "Publication Date: MM/DD/YYYY" tag, as Y-m-d.
+     *
+     * @param  list<string>  $tags
+     */
+    private function publicationDate(array $tags): ?string
+    {
+        foreach ($tags as $tag) {
+            if (preg_match('#^Publication Date: (\d{2})/(\d{2})/(\d{4})$#', $tag, $m)) {
+                return "$m[3]-$m[1]-$m[2]";
+            }
+        }
+
+        return null;
     }
 
     /**

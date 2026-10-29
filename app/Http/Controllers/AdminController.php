@@ -30,6 +30,7 @@ class AdminController extends Controller
                 'image' => $t->thumbnail(),
                 'url' => $t->url(),
                 'available' => $t->available,
+                'preorder' => $t->preorderLabel(),
                 'published' => $t->published_at?->toDateString() ?? '',
                 'note' => $t->note(),
                 'wishlisted' => $t->wishlisted_at !== null,

@@ -78,6 +78,20 @@ class TonieSyncTest extends TestCase
         $this->assertSame(1, OwnedTonie::count());
     }
 
+    public function test_sync_treats_preorders_as_available(): void
+    {
+        $preorder = $this->product('500', 'Coming Soon', available: false);
+        array_push($preorder['tags'], 'preorder', 'PreOrder Date: 10/01/2026', 'Publication Date: 12/01/2026');
+        $this->fakeApis([], [$preorder, $this->product('501', 'Sold Out', available: false)]);
+
+        app(TonieSync::class)->run();
+
+        $tonie = CatalogTonie::where('sku', '500')->first();
+        $this->assertTrue($tonie->available);
+        $this->assertSame('Pre-order · releases Dec 1', $tonie->preorderLabel());
+        $this->assertFalse(CatalogTonie::where('sku', '501')->value('available'));
+    }
+
     public function test_sync_skips_spanish_only_tonies_but_keeps_bilingual(): void
     {
         $this->fakeApis([], [
